@@ -1,0 +1,14 @@
+# macOS Finder metadata
+.DS_Store
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local configuration and secrets
+.env*
+!.env.example
+npm-debug.log*
