@@ -7,12 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "dev:local": "NEXT_PUBLIC_AUTH_MODE=emulator next dev",
+    "emulators": "firebase emulators:start --only auth --project demo-summarist",
+    "build:local": "NEXT_PUBLIC_AUTH_MODE=emulator next build",
+    "test:auth-config": "node --test tests/auth-config.test.mjs",
+    "test:auth-emulator": "node --test tests/auth-emulator.test.mjs"
   },
   "engines": {
     "node": ">=24 <26"
   },
   "dependencies": {
+    "firebase": "13.3.0",
     "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1"
@@ -23,6 +29,10 @@
     "@types/react-dom": "19.3.0",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.6",
+    "firebase-tools": "15.36.0",
     "typescript": "5.9.3"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.13.6"
   }
 }

@@ -1,3 +1,4 @@
+import { LoginButton } from "./components/auth-modal";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -46,7 +47,7 @@ export default function HomePage() {
             <Image src="/assets/logo.png" alt="Summarist" width={495} height={114} preload />
           </Link>
           <ul className="nav__list" role="list">
-            <li><button className="nav__login" type="button" disabled title="Login will be available when authentication is added">Login</button></li>
+            <li><LoginButton className="nav__login" /></li>
             { ["About", "Contact", "Help"].map((label) => (
               <li className="nav__secondary" key={label}>
                 <span aria-disabled="true" title={`${label} is not available yet`}>{label}</span>
@@ -65,8 +66,7 @@ export default function HomePage() {
                 individuals who barely have time to read,{" "}<br className="desktop-break" />
                 and even people who don’t like to read.
               </p>
-              <button className="button" type="button" disabled aria-describedby="login-availability">Login</button>
-              <p className="login-availability" id="login-availability">Login coming soon.</p>
+              <LoginButton className="button" />
             </div>
             <Image className="landing__image" src="/assets/landing.png" alt="A reader exploring ideas through books" width={779} height={740} sizes="(max-width: 768px) 1px, 400px" preload />
           </div>
@@ -137,8 +137,7 @@ export default function HomePage() {
               ))}
             </ul>
             <div className="reviews-action">
-              <button className="button" type="button" disabled aria-describedby="reviews-login-availability">Login</button>
-              <p className="login-availability" id="reviews-login-availability">Login coming soon.</p>
+              <LoginButton className="button" />
             </div>
           </div>
         </section>
