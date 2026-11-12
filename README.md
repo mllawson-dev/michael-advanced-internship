@@ -11,8 +11,8 @@ npm run dev
 ```
 
 If you do not use nvm, select Node.js 24 with your installed version manager.
-Open http://localhost:3000. The root route currently displays a static setup
-page; the homepage will be implemented one section at a time.
+Open http://localhost:3000. The root route displays the responsive static homepage: navigation, hero,
+features, benefits and statistics, testimonials, growth metrics, and footer.
 No environment configuration is required to run this stage.
 
 ## Checks
@@ -29,7 +29,7 @@ Type checking generates Next.js route types before running TypeScript.
 
 ## Structure
 
-- `app/`: Next.js App Router layout, setup page, and plain CSS.
+- `app/`: Next.js App Router layout, homepage, and plain CSS.
 - `public/assets/`: byte-for-byte copies of the supplied image assets.
 - `index.html`, `style.css`, and `assets/`: unchanged starter references.
 - `.env.example`: future Firebase browser configuration and Stripe server-only
@@ -41,8 +41,13 @@ Next.js lint rules provide development checks. Versions are pinned in
 
 ## Next stages
 
-Build the homepage navigation and hero first, then review each remaining
-section before advancing. Authentication, book APIs, the app sidebar, reader,
+The static homepage is implemented from the supplied starter references. Roboto
+is self-hosted by `next/font/google`; builds require network access to download
+the font from Google. Login buttons remain disabled, and navigation/footer items
+without implemented destinations are non-interactive. Testimonials and numerical
+claims are supplied internship reference content, not live analytics.
+
+Authentication, book APIs, the app sidebar, reader,
 audio player, search, test checkout, and settings follow in the agreed plan.
 Optional features come after required features. Subscription tier naming is
 pending confirmation. No Firebase or Stripe integration is active yet.
