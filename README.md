@@ -49,10 +49,10 @@ session restoration, logout, and a redirect to `/for-you`. Navigation/footer ite
 without implemented destinations are non-interactive. Testimonials and numerical
 claims are supplied internship reference content, not live analytics.
 
-Live Firebase authentication, book APIs, the app sidebar, reader,
+Book APIs, the app sidebar, reader,
 audio player, search, test checkout, and settings follow in the agreed plan.
 Optional features come after required features. Subscription tier naming is
-pending confirmation. No live Firebase or Stripe integration is active yet.
+pending confirmation. Firebase Authentication supports explicit live or emulator mode. Stripe is not connected.
 
 ## Local authentication without a Firebase account
 
@@ -84,12 +84,12 @@ Emulator accounts are temporary and reset when the emulator restarts. They are
 not production accounts and will not migrate to live Firebase. If stale sessions
 remain after an emulator reset, log out and sign in again.
 
-`npm run dev` and `npm run build` keep auth disabled unless
-`NEXT_PUBLIC_AUTH_MODE=emulator` is explicitly supplied. Emulator mode also
+`npm run dev` and `npm run build` use the mode set in `.env.local`;
+auth remains disabled when `NEXT_PUBLIC_AUTH_MODE` is unset or unknown. Emulator mode also
 refuses non-loopback browser hosts and never falls back to a live Firebase API.
 To test an optimized local auth build, use `npm run build:local` then `npm start`.
-These commands do not enable production authentication. Live Firebase setup,
-production access rules, and production authorization remain a separate step.
+The emulator commands override live mode and never use live configuration.
+Server authorization and database access rules must be added before protected data is introduced.
 
 Local auth regression checks (start the emulator before the second command):
 
@@ -100,3 +100,22 @@ npm run test:auth-emulator
 
 The gRPC 1.x override in package.json resolves an advisory in Firebase's bundled
 Firestore dependency; this app currently imports only Firebase App and Auth.
+
+
+## Live Firebase Authentication
+
+Copy `.env.example` to `.env.local`, set `NEXT_PUBLIC_AUTH_MODE=firebase`, and fill
+in the Firebase Web app configuration for your project. `.env.local` is ignored
+by git. Restart Next after changing these values; public environment variables
+are embedded at build time. Set the same variables in the deployment environment
+before building a hosted release. Analytics is not initialized.
+
+In Firebase Console → Authentication → Sign-in method, enable **Email/Password**
+and **Anonymous** (for Guest login). Under Authentication → Settings → Authorized
+domains, add your local/hosted hostname as needed. Local emulator accounts do not
+transfer to the live project. Live tests create actual Firebase Auth users.
+
+`npm run dev` uses live mode when configured; `npm run dev:local` always uses the
+loopback-only demo emulator. Different Firebase app names isolate their sessions.
+Missing configuration, unknown mode, or an emulator/live mismatch fails closed.
+There is no automatic fallback from one mode to the other.

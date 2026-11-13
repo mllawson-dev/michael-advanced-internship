@@ -9,10 +9,10 @@ export default function ForYouPage() {
     <main className="account-page">
       <Link href="/">Summarist home</Link>
       <h1>For you</h1>
-      {loading ? <p role="status">Checking local session…</p> : user ? (
+      {loading ? <p role="status">Checking session…</p> : user ? (
         <>
           <p>You’re signed in{user.isAnonymous ? " as a guest" : ` as ${user.email}`}.</p>
-          <p>Local emulator account. Book recommendations will be added in the next project stage.</p>
+          <p>{process.env.NEXT_PUBLIC_AUTH_MODE === "emulator" && "Local emulator account. "}Book recommendations will be added in the next project stage.</p>
           <LoginButton className="button" />
         </>
       ) : (

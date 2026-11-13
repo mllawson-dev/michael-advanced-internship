@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
-import { getLocalAuth } from "../lib/firebase-auth";
+import { getConfiguredAuth } from "../lib/firebase-auth";
 
 type AuthState = {
   open: () => void;
@@ -26,7 +26,13 @@ function errorMessage(error: unknown): string {
     case "auth/wrong-password":
     case "auth/user-not-found": return "Email or password is incorrect.";
     case "auth/too-many-requests": return "Too many attempts. Please try again later.";
-    default: return "Local authentication is unavailable. Check that npm run emulators is running and try again.";
+    case "auth/operation-not-allowed": return "This sign-in method is not enabled in Firebase. Enable Email/Password and Anonymous in Authentication settings.";
+    case "auth/configuration-not-found": return "Firebase Authentication is not set up yet. Open Authentication in the Firebase console and enable the sign-in methods.";
+    case "auth/unauthorized-domain": return "This website domain is not authorized in Firebase Authentication settings.";
+    case "auth/invalid-api-key": return "Firebase configuration could not be verified. Check the web app settings.";
+    default: return process.env.NEXT_PUBLIC_AUTH_MODE === "emulator"
+      ? "Local authentication is unavailable. Check that npm run emulators is running and try again."
+      : "Authentication is unavailable. Check your connection and try again.";
   }
 }
 
@@ -42,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const enabled = process.env.NEXT_PUBLIC_AUTH_MODE === "emulator";
+  const enabled = ["emulator", "firebase"].includes(process.env.NEXT_PUBLIC_AUTH_MODE ?? "");
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -51,20 +57,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     Promise.resolve().then(() => {
       if (!active) return;
       try {
-        unsubscribe = onAuthStateChanged(getLocalAuth(), (nextUser) => {
+        unsubscribe = onAuthStateChanged(getConfiguredAuth(), (nextUser) => {
           setUser(nextUser);
           setLoading(false);
         }, () => {
           setUser(null);
-          setError("Unable to restore local authentication. Please reload and try again.");
+          setError("Unable to restore authentication. Please reload and try again.");
           setLoading(false);
         });
       } catch {
+        if (enabled) setError("Authentication configuration is incomplete. Check the Firebase environment settings and restart the app.");
         setLoading(false);
       }
     });
     return () => { active = false; unsubscribe?.(); };
-  }, []);
+  }, [enabled]);
 
   function open() {
     if (!dialog.current || dialog.current.open) return;
@@ -94,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPending(true);
     setMessage("");
     try {
-      const auth = getLocalAuth();
+      const auth = getConfiguredAuth();
       if (!event) await signInAnonymously(auth);
       else if (mode === "register") await createUserWithEmailAndPassword(auth, email, password);
       else await signInWithEmailAndPassword(auth, email, password);
@@ -114,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPending(true);
     setError("");
     try {
-      await signOut(getLocalAuth());
+      await signOut(getConfiguredAuth());
       router.push("/");
     } catch (failure) {
       setError(errorMessage(failure));
@@ -131,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       <dialog ref={dialog} className="auth-modal" aria-labelledby="auth-title" aria-describedby="auth-description" onClose={finishClose} onCancel={(event) => { if (busy.current) event.preventDefault(); }}>
         <button className="auth-close" type="button" aria-label="Close authentication" disabled={pending} onClick={() => dialog.current?.close()}>×</button>
         <h2 id="auth-title">{mode === "login" ? "Log in to Summarist" : "Create your account"}</h2>
-        <p id="auth-description">{enabled ? "Local test accounts only. Use a test email and password; these accounts do not connect to live Firebase." : "Authentication is disabled. Run npm run dev:local with the local emulator to test."}</p>
+        <p id="auth-description">{process.env.NEXT_PUBLIC_AUTH_MODE === "emulator" ? "Local test accounts only. Use a test email and password; these accounts do not connect to live Firebase." : enabled ? "Sign in to your Summarist account, create an account, or continue as a guest." : "Authentication is not configured yet."}</p>
         <form key={mode} onSubmit={authenticate} aria-busy={pending}>
           <fieldset className="auth-fields" disabled={pending || loading || !enabled}>
             <label htmlFor="auth-email">Email</label>
@@ -143,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           </fieldset>
         </form>
         <button className="auth-guest" type="button" disabled={pending || loading || !enabled} onClick={() => void authenticate()}>Login as a guest</button>
-        <p className="auth-status" role="status">{loading ? "Checking local session…" : message}</p>
+        <p className="auth-status" role="status">{loading ? "Checking session…" : message}</p>
         <button className="auth-switch" type="button" disabled={pending} onClick={() => { setMode(mode === "login" ? "register" : "login"); setMessage(""); }}>{mode === "login" ? "Don’t have an account? Register" : "Already have an account? Login"}</button>
       </dialog>
     </AuthContext>
