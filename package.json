@@ -12,7 +12,8 @@
     "emulators": "firebase emulators:start --only auth --project demo-summarist",
     "build:local": "NEXT_PUBLIC_AUTH_MODE=emulator next build",
     "test:auth-config": "node --test tests/auth-config.test.mjs",
-    "test:auth-emulator": "node --test tests/auth-emulator.test.mjs"
+    "test:auth-emulator": "node --test tests/auth-emulator.test.mjs",
+    "test:books": "node --test tests/selected-book.test.mjs"
   },
   "engines": {
     "node": ">=24 <26"

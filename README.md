@@ -132,8 +132,7 @@ the shared authentication dialog. The existing auth provider remains at the root
 
 Book search is visibly disabled until its later functional stage. Library and
 Settings are labelled route scaffolds, with no saved books, subscription records,
-or account-setting actions yet. `/for-you` retains the Stage 3 account-status
-view until Stage 5's book sections are implemented. No new dependency is required.
+or account-setting actions yet. `/for-you` now begins Stage 5 with the API-backed Selected Book section. No new dependency is required.
 
 
 ## Avoid stale local preview servers
@@ -146,3 +145,45 @@ manifest from its startup build. Separate ports also prevent `localhost` and
 `127.0.0.1` from accidentally reaching different servers on IPv6 and IPv4.
 Next.js already isolates development output in `.next/dev`; no custom cache
 or authentication workaround is needed.
+
+
+## Stage 5: Selected Book
+
+`/for-you` fetches the public selected-book catalog on the server with a 10-second
+request timeout and no persistent cache. The response is validated and reduced
+to the fields the card needs. The API currently returns an array; the loader also
+accepts the single-object shape described by the brief. Loading uses a Suspense
+skeleton; empty and error responses have a retry control, and broken covers have
+a text fallback. Only the supplied Firebase Storage image bucket is allowed.
+
+The card is visible without login, matching the reference public catalog. No
+private user data or subscription entitlement is read here. Book-detail navigation
+and the actual audio duration remain deferred until their respective later stages.
+Recommended and Suggested Books are implemented in the sections below.
+
+Run `npm run test:books` for parsing, media validation, and upstream-state checks.
+
+
+### Recommended Books
+
+The Recommended For You row reads `getBooks?status=recommended` independently
+from Selected Book, with its own Suspense skeleton and retry/empty/error states.
+It preserves API order and validates unique IDs, rating range, boolean premium
+flags, and the same restricted cover source. Cards show cover, title, author,
+subtitle, rating, and a Premium pill only when `subscriptionRequired` is true.
+The horizontal row supports touch scrolling and keyboard arrow scrolling when
+focused; it enters the tab order only when its content overflows.
+
+Cover failures use the same reusable fallback as Selected Book. Card navigation
+and durations remain deferred with the book-detail and audio-player stages.
+`npm run test:books` covers selected, recommended, and suggested response states.
+
+
+### Suggested Books
+
+Suggested Books reads `getBooks?status=suggested` independently and reuses the
+shared `book-list.tsx` renderer and `book-cover.tsx` fallback. Each list has its
+own loading, empty, error/retry states, scroll position, and section-prefixed
+card IDs. API order, rating validation, premium flags, and media restrictions
+are preserved. Suggested covers are lazy-loaded. No durations or book-detail
+navigation are introduced in this step.
