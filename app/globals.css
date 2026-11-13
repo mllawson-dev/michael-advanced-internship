@@ -289,3 +289,31 @@ h1 {
 @media (max-width: 768px) {
   .footer-groups { grid-template-columns: 1fr; }
 }
+
+.auth-modal { width: min(480px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; border: 0; border-radius: 8px; padding: 40px 32px 32px; color: var(--color-text); background: var(--color-background); }
+.auth-modal::backdrop { background: rgb(3 43 65 / 65%); }
+.auth-modal h2 { margin: 0 24px 16px 0; color: var(--color-heading); font-size: 26px; line-height: 1.2; }
+.auth-modal p { line-height: 1.5; }
+.auth-modal form { display: grid; gap: 8px; margin-top: 24px; }
+.auth-modal input { width: 100%; min-height: 44px; padding: 10px; border: 1px solid var(--color-benefit); border-radius: 4px; font: inherit; }
+.auth-modal input:focus-visible { outline: 3px solid var(--color-heading); outline-offset: 2px; }
+.auth-modal .button { max-width: none; cursor: pointer; margin-top: 16px; }
+.auth-close { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border: 0; background: transparent; color: var(--color-heading); font-size: 28px; cursor: pointer; }
+.auth-guest, .auth-switch { width: 100%; min-height: 44px; padding: 8px; border: 0; border-radius: 4px; cursor: pointer; color: var(--color-heading); background: var(--color-panel); }
+.auth-guest { margin-top: 16px; }
+.auth-switch { background: transparent; text-decoration: underline; }
+.auth-hint { margin: 0; font-size: 14px; }
+.auth-status { min-height: 24px; margin: 16px 0; }
+.nav__login:not(:disabled) { cursor: pointer; }
+.button:not(:disabled) { cursor: pointer; }
+.button:not(:disabled):hover { background: #20ba68; }
+@media (max-width: 480px) { .auth-modal { padding-inline: 24px; } }
+
+.auth-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.account-page { max-width: var(--content-width); margin: 0 auto; padding: 40px var(--space-page); }
+.account-page h1 { margin-top: 32px; }
+.account-page p { margin: 16px 0; }
+.account-page > a { text-decoration: underline; }
+
+.auth-global-error { margin: 16px var(--space-page); color: var(--color-heading); }
+.account-page p { overflow-wrap: anywhere; }

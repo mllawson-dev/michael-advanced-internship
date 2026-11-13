@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "./components/auth-modal";
 
 const roboto = Roboto({ subsets: ["latin"], display: "swap", variable: "--font-roboto" });
 
@@ -14,7 +15,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={roboto.variable}>
-      <body>{children}</body>
+      <body><AuthProvider>{children}</AuthProvider></body>
     </html>
   );
 }
