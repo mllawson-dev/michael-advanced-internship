@@ -317,3 +317,44 @@ h1 {
 
 .auth-global-error { margin: 16px var(--space-page); color: var(--color-heading); }
 .account-page p { overflow-wrap: anywhere; }
+
+/* Shared app shell; the homepage remains outside the (app) route group. */
+.app-shell { --sidebar-width: 200px; --header-height: 80px; --shell-surface: #f7faf9; min-height: 100dvh; }
+.shell-sidebar { position: fixed; inset: 0 auto 0 0; width: var(--sidebar-width); background: var(--shell-surface); display: flex; flex-direction: column; z-index: 2; overflow-y: auto; }
+.shell-logo { display: block; padding: 20px; }
+.shell-logo img { display: block; width: 160px; height: auto; }
+.shell-navigation { display: flex; flex: 1; flex-direction: column; padding-block: 20px; }
+.shell-nav-group { list-style: none; margin: 0; padding: 0; }
+.shell-nav-group--bottom { margin-top: auto; padding-top: 32px; }
+.shell-nav-item { width: 100%; min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 16px 20px; color: var(--color-heading); border: 0; border-left: 5px solid transparent; background: transparent; font: inherit; text-align: left; text-decoration: none; }
+button.shell-nav-item, a.shell-nav-item { cursor: pointer; }
+.shell-nav-item[aria-current="page"] { border-left-color: var(--color-cta); background: #e9f2ee; }
+button.shell-nav-item:hover:not(:disabled), a.shell-nav-item:hover { background: #edf3f0; }
+.shell-nav-item--unavailable, .shell-nav-item:disabled { cursor: not-allowed; }
+.shell-icon { width: 24px; height: 24px; flex: 0 0 24px; }
+.shell-body { margin-left: var(--sidebar-width); }
+.shell-header { height: var(--header-height); border-bottom: 1px solid #e1e7e5; }
+.shell-header-inner { max-width: var(--content-width); height: 100%; padding-inline: 24px; margin-inline: auto; display: flex; align-items: center; justify-content: flex-end; gap: 24px; }
+.shell-search { display: flex; width: 340px; max-width: 100%; border: 2px solid #e1e7e5; border-radius: 8px; background: var(--color-panel); overflow: hidden; }
+.shell-search input { width: 100%; min-width: 0; height: 36px; border: 0; padding: 0 16px; background: transparent; font: inherit; font-size: 14px; color: var(--color-text); opacity: 1; cursor: not-allowed; }
+.shell-search input::placeholder { color: var(--color-text); opacity: 1; }
+.shell-search > span { display: flex; align-items: center; padding-inline: 8px; border-left: 1px solid #d8e0dc; color: var(--color-heading); }
+.shell-content { max-width: var(--content-width); margin-inline: auto; padding: 40px 24px; }
+.shell-content .account-page { padding: 0; }
+.shell-content .account-page h1 { margin-top: 0; font-size: 24px; }
+.shell-menu { display: none; width: 44px; height: 44px; padding: 10px; border: 0; background: transparent; color: var(--color-heading); cursor: pointer; flex-shrink: 0; }
+.shell-menu svg { width: 24px; height: 24px; }
+.shell-drawer { position: fixed; inset: 0 0 0 auto; margin: 0; padding: 0; border: 0; width: 260px; max-width: 85vw; height: 100dvh; max-height: 100dvh; background: var(--shell-surface); color: var(--color-heading); }
+.shell-drawer::backdrop { background: rgb(3 43 65 / 45%); }
+.shell-drawer-inner { min-height: 100%; display: flex; flex-direction: column; }
+.shell-drawer-close { align-self: flex-end; margin: 8px 12px 0; padding: 0; width: 44px; height: 44px; border: 0; background: transparent; font-size: 30px; color: inherit; cursor: pointer; }
+.shell-drawer .shell-logo { padding-top: 0; }
+.shell-drawer .shell-navigation { min-height: 500px; }
+.shell-nav-item:focus-visible { outline-offset: -4px; }
+@media (max-width: 768px) {
+  .shell-sidebar { display: none; }
+  .shell-body { margin-left: 0; }
+  .shell-menu { display: block; }
+  .shell-header-inner { justify-content: space-between; }
+  .shell-search { flex: 1; width: auto; }
+}

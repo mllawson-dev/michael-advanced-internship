@@ -24,7 +24,8 @@ npm run build
 npm start
 ```
 
-`npm start` serves the production build after `npm run build`.
+`npm start` serves the production build at http://localhost:3001 after
+`npm run build`. Development uses http://localhost:3000.
 Type checking generates Next.js route types before running TypeScript.
 
 ## Structure
@@ -119,3 +120,29 @@ transfer to the live project. Live tests create actual Firebase Auth users.
 loopback-only demo emulator. Different Firebase app names isolate their sessions.
 Missing configuration, unknown mode, or an emulator/live mismatch fails closed.
 There is no automatic fallback from one mode to the other.
+
+## Stage 4 app layout
+
+The `(app)` route group shares a desktop sidebar, header, content area, and native
+mobile navigation dialog across `/for-you`, `/library`, and `/settings`. It does
+not wrap the homepage; future sales pages should stay outside this group too.
+Navigation reflects the active route, closes after route changes or Escape, and
+returns focus after dismissal. Mobile Login closes navigation before opening
+the shared authentication dialog. The existing auth provider remains at the root.
+
+Book search is visibly disabled until its later functional stage. Library and
+Settings are labelled route scaffolds, with no saved books, subscription records,
+or account-setting actions yet. `/for-you` retains the Stage 3 account-status
+view until Stage 5's book sections are implemented. No new dependency is required.
+
+
+## Avoid stale local preview servers
+
+Use `npm run dev` for day-to-day work on port 3000. For a production preview,
+stop any running `npm start` process, run `npm run build`, then run `npm start`
+(on port 3001). Always restart the production preview after rebuilding, switching
+branches, or moving routes: a running production server retains the route
+manifest from its startup build. Separate ports also prevent `localhost` and
+`127.0.0.1` from accidentally reaching different servers on IPv6 and IPv4.
+Next.js already isolates development output in `.next/dev`; no custom cache
+or authentication workaround is needed.

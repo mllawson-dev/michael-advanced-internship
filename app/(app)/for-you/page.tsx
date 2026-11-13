@@ -1,14 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { LoginButton, useAuth } from "../components/auth-modal";
+import { LoginButton, useAuth } from "../../components/auth-modal";
 
 export default function ForYouPage() {
   const { user, loading } = useAuth();
   return (
-    <main className="account-page">
-      <Link href="/">Summarist home</Link>
-      <h1>For you</h1>
+    <section className="account-page" aria-labelledby="for-you-title">
+      <h1 id="for-you-title">For you</h1>
       {loading ? <p role="status">Checking session…</p> : user ? (
         <>
           <p>You’re signed in{user.isAnonymous ? " as a guest" : ` as ${user.email}`}.</p>
@@ -21,6 +19,6 @@ export default function ForYouPage() {
           <LoginButton className="button" />
         </>
       )}
-    </main>
+    </section>
   );
 }
