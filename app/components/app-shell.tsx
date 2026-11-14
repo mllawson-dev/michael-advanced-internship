@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useAuth } from "./auth-modal";
+import { BookSearch } from "./book-search";
 
 const paths = {
   home: "m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9",
@@ -33,7 +34,7 @@ function SidebarContent({ onNavigate, onAuth }: { onNavigate?: () => void; onAut
           <li>{navLink("/for-you", "For you", "home")}</li>
           <li>{navLink("/library", "My Library", "library")}</li>
           <li><span className="shell-nav-item shell-nav-item--unavailable" aria-disabled="true" title="Highlights is not available"><Icon name="highlight" /><span>Highlights</span></span></li>
-          <li><span className="shell-nav-item shell-nav-item--unavailable" aria-disabled="true" title="Search is not available yet"><Icon name="search" /><span>Search</span></span></li>
+          <li><span className="shell-nav-item shell-nav-item--unavailable" aria-disabled="true" title="Use the search bar above"><Icon name="search" /><span>Search</span></span></li>
         </ul>
         <ul className="shell-nav-group shell-nav-group--bottom" role="list">
           <li>{navLink("/settings", "Settings", "settings")}</li>
@@ -82,6 +83,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
   function authenticate() { if (user) void logout(); else open(); }
 
+  if (pathname === "/choose-plan") return <main className="shell-content">{children}</main>;
+
   return (
     <div className="app-shell">
       <a className="skip-link" href="#app-content">Skip to content</a>
@@ -89,10 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="shell-body">
         <header className="shell-header">
           <div className="shell-header-inner">
-            <div className="shell-search" title="Book search is not available yet">
-              <input type="search" placeholder="Search for books" aria-label="Search for books (not available yet)" disabled />
-              <span><Icon name="search" /></span>
-            </div>
+            <BookSearch key={pathname} />
             <button ref={menuButton} className="shell-menu" type="button" aria-label="Open navigation menu" aria-expanded={expanded} aria-controls="app-mobile-menu" aria-haspopup="dialog" onClick={() => {
               if (!drawer.current || drawer.current.open) return;
               overflow.current = document.body.style.overflow;

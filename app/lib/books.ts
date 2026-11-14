@@ -22,7 +22,7 @@ export function parseSelectedBook(value: unknown): SelectedBook | null {
   return parseCatalogBook(entry, "selected");
 }
 
-function parseCatalogBook(value: unknown, expectedStatus?: "selected" | "recommended" | "suggested"): SelectedBook {
+export function parseCatalogBook(value: unknown, expectedStatus?: "selected" | "recommended" | "suggested"): SelectedBook {
   if (!value || typeof value !== "object") throw new Error("Invalid catalog book.");
   const record = value as Record<string, unknown>;
   const required = ["id", "title", "author", "subTitle", "imageLink", "type"] as const;
