@@ -5,6 +5,7 @@ export type SelectedBook = {
   subTitle: string;
   imageLink: string;
   type: string;
+  audioLink?: string;
 };
 export type SelectedBookResult =
   | { status: "success"; book: SelectedBook }
@@ -36,7 +37,14 @@ function parseCatalogBook(value: unknown, expectedStatus?: "selected" | "recomme
       !image.pathname.startsWith("/v0/b/summaristt.appspot.com/o/books%2Fimages%2F")) {
     throw new Error("Invalid book cover source.");
   }
-  return Object.fromEntries(required.map((field) => [field, (record[field] as string).trim()])) as SelectedBook;
+  const book = Object.fromEntries(required.map((field) => [field, (record[field] as string).trim()])) as SelectedBook;
+  if (typeof record.audioLink === "string" && record.audioLink) {
+    const audio = new URL(record.audioLink);
+    if (audio.protocol !== "https:" || audio.hostname !== "firebasestorage.googleapis.com" || audio.username || audio.password || audio.port ||
+        !audio.pathname.startsWith("/v0/b/summaristt.appspot.com/o/books%2Faudios%2F")) throw new Error("Invalid audio source.");
+    book.audioLink = audio.href;
+  }
+  return book;
 }
 
 export async function loadSelectedBook(fetcher: typeof fetch = fetch): Promise<SelectedBookResult> {
@@ -131,7 +139,7 @@ export function parseBookDetails(value: unknown, id: string): BookDetails | null
       typeof record.authorDescription !== "string" || !record.authorDescription.trim()) {
     throw new Error("Invalid book details.");
   }
-  // Project only public detail fields; summary/audio and upstream extras stay out of the view.
+  // Project public details and validated audio metadata source; summary and upstream extras stay out.
   return { ...base, subscriptionRequired: record.subscriptionRequired, averageRating: record.averageRating,
     totalRating: record.totalRating as number, keyIdeas: record.keyIdeas as number,
     tags: [...new Set((record.tags as string[]).map((tag) => tag.trim()))],

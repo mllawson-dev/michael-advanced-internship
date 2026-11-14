@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BookDuration } from "./book-duration";
 import { BookCover } from "./book-cover";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -15,7 +16,7 @@ function BookCard({ book }: { book: SelectedBook }) {
         <div className="selected-card__info">
           <h2 id="selected-book-title">{book.title}</h2>
           <p className="selected-card__author">{book.author}</p>
-          <p className="selected-card__format"><span className="selected-card__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="m9 5 11 7-11 7V5Z" /></svg></span>{book.type}</p>
+          <p className="selected-card__format"><span className="selected-card__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="m9 5 11 7-11 7V5Z" /></svg></span>{book.type} <BookDuration key={book.audioLink} src={book.audioLink} /></p>
         </div>
       </div>
     </Link></article>

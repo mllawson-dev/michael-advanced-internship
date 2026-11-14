@@ -194,7 +194,7 @@ navigation are introduced in this step.
 loader. Route IDs are validated before fetching; response IDs, cover origins,
 ratings, counts, descriptions, tags, and premium flags fail closed on malformed
 data. Missing books use the route's not-found view; transient failures offer retry.
-The client receives only display fields, excluding summary and audio payloads.
+The client receives display fields and a validated audio URL for duration metadata, excluding summaries.
 For You cards link to details with prefetch disabled to avoid fetching an entire
 catalog's details in advance. The layout includes cover, title, author, subtitle,
 rating count, key ideas, format, topics, book description, and author biography.
@@ -212,3 +212,19 @@ without summary/audio content or payment controls. The player destination also
 checks the restored session and premium flag when opened directly. No verified
 subscription source exists yet, so login alone never unlocks premium books.
 These are UI gates only, not server authorization for the public upstream API.
+
+## Stage 7: Reader and Player
+
+`/player/[id]` displays plain-text summaries with preserved paragraph breaks and
+four text sizes. Listen links use `?mode=listen` to focus the audio region without
+autoplay. The native audio element powers custom play/pause, ±10-second skip,
+keyboard-accessible seeking, elapsed/total duration, speed selection, and retry.
+Playback is scoped to this route and stops when its audio element is unmounted.
+Session restoration, auth errors, signed-out users, and premium books fail closed
+before mounting the content loader. Content requests are bounded and cancelled
+on unmount; responses revalidate ID, premium status, and the restricted audio
+bucket. Missing text/audio and request/media failures have explicit states.
+These remain client UI gates over a public upstream API, not server authorization.
+Premium entitlement verification remains deferred. Catalog and detail duration badges
+load restricted audio metadata when visible, with an unavailable fallback.
+`npm run test:books` includes content parsing and loader failure coverage.

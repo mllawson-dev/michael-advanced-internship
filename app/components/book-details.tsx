@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BookDuration } from "./book-duration";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { BookDetailsResult } from "../lib/books";
@@ -12,19 +13,19 @@ function BookActions({ id, premium }: { id: string; premium: boolean }) {
   const router = useRouter();
   const { open, user, loading, pending, enabled, error } = useAuth();
   const [message, setMessage] = useState("");
-  function activate() {
+  function activate(listen = false) {
     // UI gate only: no content, payment, or persisted user data is accessed here.
     if (loading || pending) return;
     if (!enabled || error) { setMessage("Authentication is unavailable. Please reload and try again."); return; }
     if (!user) { open(`/book/${id}`); return; }
     const destination = bookDestination(id, premium);
     if (!destination) { setMessage("This book is unavailable."); return; }
-    router.push(destination);
+    router.push(listen && !premium ? `${destination}?mode=listen` : destination);
   }
   return <div className="book-actions">
     <div className="book-actions__buttons">
-      <button className="button" type="button" disabled={loading || pending} onClick={activate}>Read</button>
-      <button className="button book-actions__listen" type="button" disabled={loading || pending} onClick={activate}>Listen</button>
+      <button className="button" type="button" disabled={loading || pending} onClick={() => activate()}>Read</button>
+      <button className="button book-actions__listen" type="button" disabled={loading || pending} onClick={() => activate(true)}>Listen</button>
     </div>
     <p className="book-actions__status" role="status">{loading ? "Checking session…" : message}</p>
   </div>;
@@ -47,6 +48,7 @@ export function BookDetailsView({ result }: { result: BookDetailsResult }) {
       <dl className="book-details__stats">
         <div><dt>Rating</dt><dd>★ {book.averageRating} / 5 <span>({book.totalRating} ratings)</span></dd></div>
         <div><dt>Key ideas</dt><dd>{book.keyIdeas}</dd></div>
+        <div><dt>Duration</dt><dd><BookDuration key={book.audioLink} src={book.audioLink} /></dd></div>
         <div><dt>Format</dt><dd>{book.type}</dd></div>
       </dl>
       <BookActions key={book.id} id={book.id} premium={book.subscriptionRequired} />
