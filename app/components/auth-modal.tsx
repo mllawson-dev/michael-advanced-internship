@@ -3,10 +3,11 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
+import { authReturnPath } from "../lib/book-access";
 import { getConfiguredAuth } from "../lib/firebase-auth";
 
 type AuthState = {
-  open: () => void;
+  open: (returnTo?: string) => void;
   user: User | null;
   loading: boolean;
   pending: boolean;
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
+  const returnPath = useRef("/for-you");
   const previousOverflow = useRef("");
   const busy = useRef(false);
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -73,8 +75,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { active = false; unsubscribe?.(); };
   }, [enabled]);
 
-  function open() {
+  function open(returnTo?: string) {
     if (!dialog.current || dialog.current.open) return;
+    // Only allow known local book routes; never redirect to an arbitrary supplied URL.
+    returnPath.current = authReturnPath(returnTo);
     trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setMode("login");
     setMessage("");
@@ -106,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       else if (mode === "register") await createUserWithEmailAndPassword(auth, email, password);
       else await signInWithEmailAndPassword(auth, email, password);
       dialog.current?.close();
-      router.push("/for-you");
+      router.push(returnPath.current);
     } catch (failure) {
       setMessage(errorMessage(failure));
     } finally {
@@ -165,5 +169,5 @@ export function useAuth() {
 
 export function LoginButton({ className }: { className: string }) {
   const { open, user, loading, pending, logout } = useAuth();
-  return <button className={className} type="button" onClick={user ? () => void logout() : open} disabled={loading || pending} aria-haspopup={user ? undefined : "dialog"}>{loading ? "Checking session…" : user ? "Logout" : "Login"}</button>;
+  return <button className={className} type="button" onClick={user ? () => void logout() : () => open()} disabled={loading || pending} aria-haspopup={user ? undefined : "dialog"}>{loading ? "Checking session…" : user ? "Logout" : "Login"}</button>;
 }
