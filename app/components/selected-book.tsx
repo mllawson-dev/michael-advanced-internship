@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { BookCover } from "./book-cover";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -7,7 +8,7 @@ import type { SelectedBook, SelectedBookResult } from "../lib/books";
 
 function BookCard({ book }: { book: SelectedBook }) {
   return (
-    <article className="selected-card" aria-labelledby="selected-book-title">
+    <article aria-labelledby="selected-book-title"><Link className="selected-card book-card-link" href={`/book/${book.id}`} prefetch={false} aria-labelledby="selected-book-title">
       <p className="selected-card__tagline">{book.subTitle}</p>
       <div className="selected-card__details">
         <BookCover title={book.title} imageLink={book.imageLink} size={140} className="selected-card__cover" eager />
@@ -17,7 +18,7 @@ function BookCard({ book }: { book: SelectedBook }) {
           <p className="selected-card__format"><span className="selected-card__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="m9 5 11 7-11 7V5Z" /></svg></span>{book.type}</p>
         </div>
       </div>
-    </article>
+    </Link></article>
   );
 }
 

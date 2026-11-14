@@ -187,3 +187,28 @@ own loading, empty, error/retry states, scroll position, and section-prefixed
 card IDs. API order, rating validation, premium flags, and media restrictions
 are preserved. Suggested covers are lazy-loaded. No durations or book-detail
 navigation are introduced in this step.
+
+## Stage 6: Book Details
+
+`/book/[id]` uses the existing app shell and a bounded, uncached public book API
+loader. Route IDs are validated before fetching; response IDs, cover origins,
+ratings, counts, descriptions, tags, and premium flags fail closed on malformed
+data. Missing books use the route's not-found view; transient failures offer retry.
+The client receives only display fields, excluding summary and audio payloads.
+For You cards link to details with prefetch disabled to avoid fetching an entire
+catalog's details in advance. The layout includes cover, title, author, subtitle,
+rating count, key ideas, format, topics, book description, and author biography.
+Read/Listen authentication and free/premium destination routing are implemented;
+duration, player implementation, checkout, and optional library persistence remain deferred.
+`npm run test:books` covers both catalog and detail loaders.
+
+Book Details now provides Read/Listen actions. Signed-out actions open the shared
+modal; successful authentication returns to the same validated local book route.
+Session restoration disables actions. Authentication/configuration errors block
+progress, and a signed-in user is never assumed to have a premium subscription.
+Signed-in actions route free books to `/player/[id]` and premium books to
+`/choose-plan`. Those routes provide explicit future-stage destination views,
+without summary/audio content or payment controls. The player destination also
+checks the restored session and premium flag when opened directly. No verified
+subscription source exists yet, so login alone never unlocks premium books.
+These are UI gates only, not server authorization for the public upstream API.
