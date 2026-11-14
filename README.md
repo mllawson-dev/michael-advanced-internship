@@ -228,3 +228,19 @@ These remain client UI gates over a public upstream API, not server authorizatio
 Premium entitlement verification remains deferred. Catalog and detail duration badges
 load restricted audio metadata when visible, with an unavailable fallback.
 `npm run test:books` includes content parsing and loader failure coverage.
+
+## Stage 8: Search
+
+The app header searches public books by title or author through
+`getBooksByAuthorOrTitle`, debounced by 300 ms. Empty input makes no request;
+queries are trimmed, bounded to 200 characters, and URL-encoded. Requests time out
+after 10 seconds and are aborted on query change/unmount; stale responses cannot
+replace the current results. The dropdown provides a loading skeleton, empty
+message, error/retry, restricted cover fallback, and links to book details with
+prefetch disabled. Only validated ID/title/author/cover fields enter search state.
+Arrow Down moves to the first result, Tab traverses links, and Escape, outside
+click, focus leaving the component, or navigation dismisses results. Search resets
+on route changes. The home and choose-plan pages omit search; choose-plan also
+omits the sidebar per the brief. The sidebar Search item remains unavailable.
+`npm run test:books` includes search parsing, query validation/encoding, and failure
+coverage. Explicit TypeScript import extensions are enabled for Node-native tests.
