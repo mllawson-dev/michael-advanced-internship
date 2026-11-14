@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BookDuration } from "./book-duration";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { BookListItem, BookListKind, BookListResult } from "../lib/books";
@@ -30,7 +31,7 @@ function BookRow({ books, kind }: { books: BookListItem[]; kind: BookListKind })
               <p className="recommendation__author">{book.author}</p>
               <p className="recommendation__subtitle">{book.subTitle}</p>
               <p className="recommendation__rating"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" focusable="false"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2L5.8 21 7 14.2 2 9.3l6.9-1L12 2Z" /></svg><span className="visually-hidden">Rating: </span>{book.averageRating}<span className="visually-hidden"> out of 5</span></p>
-            </Link></article>
+            <BookDuration key={book.audioLink} src={book.audioLink} /></Link></article>
           </li>
         ))}
       </ul>
