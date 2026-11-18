@@ -278,3 +278,16 @@ and GOOGLE_APPLICATION_CREDENTIALS pointing outside the repository. Never commit
 service-account JSON or secret keys. Forward Stripe events with the Stripe CLI to
 `/api/billing/webhook`; configure the sandbox customer portal before testing it.
 No production deployment or real charge is part of this stage.
+
+## Stage 10: Settings
+
+Settings now has a signed-out illustration and login action returning to
+`/settings`, plus a guest-account explanation. Registered users see their email
+and verified Basic/Premium/Premium Plus plan with a readable subscription status.
+Basic accounts can upgrade through `/choose-plan`; existing subscriptions retain
+billing-portal management and a manual status refresh. Authentication restoration
+and subscription loading use skeletons. Verification failures show retry rather
+than presenting an unverified Basic plan as current. Portal creation requires an
+available registered session, uses a bounded request and exact Stripe portal
+origin, and prevents duplicate clicks. No billing APIs or entitlement policies
+were changed in this stage.
