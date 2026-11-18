@@ -244,3 +244,37 @@ on route changes. The home and choose-plan pages omit search; choose-plan also
 omits the sidebar per the brief. The sidebar Search item remains unavailable.
 `npm run test:books` includes search parsing, query validation/encoding, and failure
 coverage. Explicit TypeScript import extensions are enabled for Node-native tests.
+
+## Stage 9: Plans and test checkout
+
+Plans offer monthly Premium ($9.99 USD) and annual Premium Plus ($59.99 USD),
+with identical catalog access. Annual checkout offers a seven-day trial only when
+no prior subscription trial exists for that Stripe customer. Registered Firebase
+accounts are required; anonymous and emulator identities fail closed. Checkout
+uses hosted Stripe TEST mode only, server-selected price IDs and an exact APP_URL
+origin. The sales page preserves plan selection through login and cancellation.
+
+Server routes under `/api/billing` verify Firebase ID tokens with revocation
+checks before accessing user-scoped billing state. Newly tracked billing records
+live in server-only `billingCustomers` and `billingEvents`; there is no historical
+app billing data to backfill. Firestore deny-all browser rules protect these
+collections. A Firestore lease serializes checkout; stable Stripe idempotency
+keys recover lost create responses. Settings uses Stripe's customer portal.
+Subscription reads reconcile current Stripe state rather than trusting a success
+redirect; only allowlisted active/trialing subscriptions unlock premium content.
+Premium content is loaded through `/api/books/[id]/content`, with independent
+server identity/entitlement checks. The upstream source remains public.
+
+Webhook raw bodies must pass Stripe signature verification and test-mode checks
+before writes. Event IDs deduplicate transactionally. Full-refund/dispute events
+persist a fail-closed billing block requiring owner review; other subscription
+events cannot clear that block. Stripe subscription state is read on demand, so
+cancellation/payment failures are reflected without trusting event ordering.
+This conservative policy revokes all catalog entitlement for a customer with a
+full refund/dispute; partial refunds do not automatically revoke access.
+
+Local setup requires APP_URL, Stripe test key and prices, webhook signing secret,
+and GOOGLE_APPLICATION_CREDENTIALS pointing outside the repository. Never commit
+service-account JSON or secret keys. Forward Stripe events with the Stripe CLI to
+`/api/billing/webhook`; configure the sandbox customer portal before testing it.
+No production deployment or real charge is part of this stage.

@@ -490,3 +490,32 @@ button.shell-nav-item:hover:not(:disabled), a.shell-nav-item:hover { background:
 .search-result-cover { flex-shrink: 0; width: 48px; height: 64px; object-fit: contain; }
 .search-skeleton { height: 64px; background: var(--color-panel); margin-top: 12px; }
 @media (max-width: 768px) { .book-search { flex: 1; min-width: 0; } .search-results { width: calc(100vw - 48px); left: 0; right: auto; } }
+
+.plans-page { margin: -32px -24px; color: var(--color-heading); }
+.plans-page .button { display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 8px 16px; margin-inline: auto; }
+.plans-header { max-width: 1070px; margin: auto; display: flex; justify-content: space-between; align-items: center; padding: 24px; gap: 24px; }
+.plans-header img { width: 180px; height: auto; }
+.plans-hero { background: var(--color-panel); text-align: center; padding: 64px 24px 0; }
+.plans-hero h1 { max-width: 700px; font-size: clamp(32px, 5vw, 48px); line-height: 1.15; margin: 0 auto 24px; }
+.plans-hero p { font-size: 20px; max-width: 650px; margin: 0 auto 32px; }
+.plans-image { display: block; max-width: 100%; width: 700px; height: auto; margin: 40px auto 0; }
+.plans-benefits { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; max-width: 1070px; padding: 64px 24px; margin: auto; }
+.plans-benefits h2 { font-size: 24px; }
+.plans-selection, .plans-faq { max-width: 650px; padding: 32px 24px; margin: auto; }
+.plans-selection { text-align: center; scroll-margin-top: 24px; }
+.plans-selection h2, .plans-faq h2 { font-size: 32px; line-height: 1.2; }
+.plans-selection fieldset { border: 0; padding: 0; display: grid; gap: 20px; margin: 32px 0; text-align: left; }
+.plan-option { display: flex; align-items: flex-start; gap: 20px; padding: 24px; border: 2px solid #dce4e5; border-radius: 4px; cursor: pointer; }
+.plan-option--selected { border-color: var(--color-cta); background: var(--color-panel); }
+.plan-option input { margin-top: 6px; width: 20px; height: 20px; accent-color: var(--color-heading); flex-shrink: 0; }
+.plan-option > span { display: grid; gap: 8px; }
+.plan-option strong { font-size: 20px; }
+.plan-price { display: block; font-size: 32px; font-weight: 700; }
+.plan-price span { font-size: 16px; font-weight: 400; }
+.plans-selection > .button { width: 100%; }
+.plans-status { min-height: 24px; }
+.plans-faq details { border-bottom: 1px solid #dce4e5; padding: 20px 0; }
+.plans-faq summary { font-size: 20px; font-weight: 700; cursor: pointer; }
+.plans-faq details p { margin-bottom: 0; }
+.plans-footer { text-align: center; padding: 48px 24px; background: var(--color-panel); margin-top: 48px; }
+@media (max-width: 600px) { .plans-benefits { grid-template-columns: 1fr; gap: 12px; padding-block: 32px; } .plans-hero { padding-top: 32px; } .plans-header img { width: 140px; } .plan-option { padding: 20px 16px; gap: 12px; } }

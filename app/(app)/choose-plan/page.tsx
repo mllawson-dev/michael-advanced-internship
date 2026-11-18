@@ -1,5 +1,5 @@
-import Link from "next/link";
-
-export default function ChoosePlanPage() {
-  return <section className="selected-state"><h1>Unlock premium books</h1><p>Subscription plans and checkout are coming in the subscription stage. No payment is available yet.</p><Link className="button" href="/for-you">Browse books</Link></section>;
+import { Plans } from "../../components/plans";
+export default async function ChoosePlanPage({ searchParams }: { searchParams: Promise<{ plan?: string; checkout?: string }> }) {
+  const query = await searchParams;
+  return <Plans initialPlan={query.plan} checkoutStatus={query.checkout} />;
 }
