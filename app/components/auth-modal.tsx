@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function open(returnTo?: string) {
     if (!dialog.current || dialog.current.open) return;
-    // Only allow known local book routes; never redirect to an arbitrary supplied URL.
+    // Allowlisted local destinations only; never redirect to arbitrary supplied URLs.
     returnPath.current = authReturnPath(returnTo);
     trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setMode("login");

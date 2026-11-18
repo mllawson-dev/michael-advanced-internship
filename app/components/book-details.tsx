@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSubscription } from "./subscription";
 import { BookDuration } from "./book-duration";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +12,7 @@ import { BookCover } from "./book-cover";
 
 function BookActions({ id, premium }: { id: string; premium: boolean }) {
   const router = useRouter();
+  const subscription = useSubscription();
   const { open, user, loading, pending, enabled, error } = useAuth();
   const [message, setMessage] = useState("");
   function activate(listen = false) {
@@ -18,15 +20,17 @@ function BookActions({ id, premium }: { id: string; premium: boolean }) {
     if (loading || pending) return;
     if (!enabled || error) { setMessage("Authentication is unavailable. Please reload and try again."); return; }
     if (!user) { open(`/book/${id}`); return; }
-    const destination = bookDestination(id, premium);
+    if (premium && subscription.phase !== "success") { setMessage(subscription.phase === "loading" ? "Checking your subscription…" : "Subscription verification failed. Please retry."); return; }
+    const destination = bookDestination(id, premium, subscription.entitled, listen);
     if (!destination) { setMessage("This book is unavailable."); return; }
-    router.push(listen && !premium ? `${destination}?mode=listen` : destination);
+    router.push(destination);
   }
   return <div className="book-actions">
     <div className="book-actions__buttons">
       <button className="button" type="button" disabled={loading || pending} onClick={() => activate()}>Read</button>
       <button className="button book-actions__listen" type="button" disabled={loading || pending} onClick={() => activate(true)}>Listen</button>
     </div>
+    {premium && subscription.phase === "error" && <button className="button" type="button" onClick={subscription.retry}>Retry subscription verification</button>}
     <p className="book-actions__status" role="status">{loading ? "Checking session…" : message}</p>
   </div>;
 }

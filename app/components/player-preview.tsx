@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSubscription } from "./subscription";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./auth-modal";
 import { BookCover } from "./book-cover";
@@ -49,6 +50,7 @@ function AudioPlayer({ src, book }: { src: string; book: BookDetails }) {
 }
 
 function Reader({ book, listen }: { book: BookDetails; listen: boolean }) {
+  const { user } = useAuth();
   const [result, setResult] = useState<ContentResult | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [fontSize, setFontSize] = useState(18);
@@ -58,9 +60,10 @@ function Reader({ book, listen }: { book: BookDetails; listen: boolean }) {
   }, [listen, result]);
   useEffect(() => {
     const controller = new AbortController();
-    void loadBookContent(book.id, controller.signal).then((value) => { if (!controller.signal.aborted) setResult(value); });
+    const request = book.subscriptionRequired && user ? user.getIdToken().then((token) => fetch(`/api/books/${book.id}/content`, { headers: { authorization: `Bearer ${token}` }, signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]), cache: "no-store" })).then((response) => response.json() as Promise<ContentResult>).catch(() => ({ status: "error" } as ContentResult)) : loadBookContent(book.id, controller.signal);
+    void request.then((value) => { if (!controller.signal.aborted) setResult(value); });
     return () => controller.abort();
-  }, [book.id, attempt]);
+  }, [book.id, book.subscriptionRequired, user, attempt]);
   return <article className="reader">
     <Link className="book-back" href={`/book/${book.id}`}>← Back to book details</Link>
     <div className="reader__heading"><h1>{book.title}</h1><p>{book.author}</p></div>
@@ -79,9 +82,12 @@ function Reader({ book, listen }: { book: BookDetails; listen: boolean }) {
 
 export function PlayerPreview({ book, listen = false }: { book: BookDetails; listen?: boolean }) {
   const { user, open, loading, pending, enabled, error } = useAuth();
+  const subscription = useSubscription();
   if (loading) return <p role="status">Checking session…</p>;
+  if (user && book.subscriptionRequired && subscription.phase === "loading") return <p role="status">Checking your subscription…</p>;
+  if (user && book.subscriptionRequired && subscription.phase === "error") return <section className="selected-state"><h1>{book.title}</h1><p role="alert">Your subscription could not be verified.</p><button className="button" onClick={subscription.retry}>Retry verification</button></section>;
   // Fail closed before mounting the content fetcher or audio element. Logout unmounts both.
-  if (!enabled || error || !user || book.subscriptionRequired) return <section className="selected-state"><h1>{book.title}</h1>
+  if (!enabled || error || !user || (book.subscriptionRequired && !subscription.entitled)) return <section className="selected-state"><h1>{book.title}</h1>
     {!enabled || error ? <p role="alert">Authentication is unavailable. Please reload and try again.</p> : !user ? <><p>Log in to continue to this book.</p><button className="button" disabled={pending} onClick={() => open(`/book/${book.id}`)}>Login</button></> : <><p>A verified subscription is required for this premium book.</p><Link className="button" href="/choose-plan">View plans</Link></>}
     <p><Link href={`/book/${book.id}`}>Back to book details</Link></p></section>;
   return <Reader key={`${user.uid}:${book.id}`} book={book} listen={listen} />;

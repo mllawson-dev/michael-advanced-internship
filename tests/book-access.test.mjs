@@ -13,3 +13,9 @@ test('login return paths allow only local book details routes', () => {
     assert.equal(authReturnPath(value), '/for-you');
   }
 });
+
+test('listen entry is preserved for free and entitled premium books without changing denied routing', () => {
+  assert.equal(bookDestination('example', false, false, true), '/player/example?mode=listen');
+  assert.equal(bookDestination('example', true, true, true), '/player/example?mode=listen');
+  assert.equal(bookDestination('example', true, false, true), '/choose-plan');
+});

@@ -1,13 +1,13 @@
 export type BookContent = { summary: string; audioLink: string | null };
 export type ContentResult = { status: "success"; content: BookContent } | { status: "empty" | "error" | "blocked" };
 
-export function parseBookContent(value: unknown, id: string): ContentResult {
+export function parseBookContent(value: unknown, id: string, entitled = false): ContentResult {
   if (value === null) return { status: "empty" };
   if (!value || typeof value !== "object") throw new Error("Invalid content");
   const record = value as Record<string, unknown>;
   if (record.id !== id || typeof record.subscriptionRequired !== "boolean") throw new Error("Invalid book");
   // Fail closed: login alone never grants premium entitlements.
-  if (record.subscriptionRequired) return { status: "blocked" };
+  if (record.subscriptionRequired && !entitled) return { status: "blocked" };
   const summary = typeof record.summary === "string" ? record.summary.trim() : "";
   let audioLink: string | null = null;
   if (record.audioLink !== undefined && record.audioLink !== null && record.audioLink !== "") {
