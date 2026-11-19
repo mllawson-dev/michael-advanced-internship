@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { libraryRequest } from "../lib/library";
 import { useSubscription } from "./subscription";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./auth-modal";
@@ -14,6 +15,16 @@ function clock(seconds: number) {
 }
 
 function AudioPlayer({ src, book }: { src: string; book: BookDetails }) {
+  const { user } = useAuth();
+  const completionBusy = useRef(false);
+  const [completion, setCompletion] = useState("");
+  async function finishBook() {
+    if (!user || completionBusy.current) return;
+    completionBusy.current = true; setCompletion("Saving finished book…");
+    try { await libraryRequest(user, "finish", book.id); setCompletion("Finished book saved to My Library."); }
+    catch { setCompletion("Couldn’t save your finished book."); }
+    finally { completionBusy.current = false; }
+  }
   const audio = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
@@ -37,7 +48,8 @@ function AudioPlayer({ src, book }: { src: string; book: BookDetails }) {
       const value = event.currentTarget.duration;
       setDuration(Number.isFinite(value) ? value : 0); setReady(Number.isFinite(value) && value > 0);
     }} onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)} onPlay={() => setPlaying(true)}
-      onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} onError={() => { setReady(false); setError("Audio is unavailable. Please retry."); }} />
+      onPause={() => setPlaying(false)} onEnded={() => { setPlaying(false); void finishBook(); }} onError={() => { setReady(false); setError("Audio is unavailable. Please retry."); }} />
+    {completion && <p className="audio-player__completion" role="status">{completion}{completion === "Couldn’t save your finished book." && <button onClick={() => void finishBook()}>Retry saving finished book</button>}</p>}
     <div className="audio-player__book"><BookCover title={book.title} imageLink={book.imageLink} size={56} className="audio-player__cover" /><div><strong>{book.title}</strong><p>{book.author}</p></div></div>
     <div className="audio-player__transport"><div className="audio-player__buttons">
       <button type="button" disabled={!ready} onClick={() => seek(time - 10)} aria-label="Skip back 10 seconds">↶ 10</button>

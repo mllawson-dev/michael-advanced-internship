@@ -14,7 +14,8 @@
     "test:auth-config": "node --test tests/auth-config.test.mjs",
     "test:auth-emulator": "node --test tests/auth-emulator.test.mjs",
     "test:books": "node --test tests/selected-book.test.mjs tests/book-details.test.mjs tests/book-access.test.mjs tests/book-content.test.mjs tests/book-search.test.mjs",
-    "test:billing": "node --test tests/billing-policy.test.mjs tests/billing-routes.test.mjs"
+    "test:billing": "node --test tests/billing-policy.test.mjs tests/billing-routes.test.mjs",
+    "test:library": "node --test tests/library.test.mjs"
   },
   "engines": {
     "node": ">=24 <26"

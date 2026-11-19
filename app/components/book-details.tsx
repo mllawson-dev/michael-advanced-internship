@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SaveBook } from "./library";
 import { useSubscription } from "./subscription";
 import { BookDuration } from "./book-duration";
 import { useState, useTransition } from "react";
@@ -56,6 +57,7 @@ export function BookDetailsView({ result }: { result: BookDetailsResult }) {
         <div><dt>Format</dt><dd>{book.type}</dd></div>
       </dl>
       <BookActions key={book.id} id={book.id} premium={book.subscriptionRequired} />
+      <SaveBook key={book.id} id={book.id} />
       <section aria-labelledby="book-about"><h2 id="book-about">What’s it about?</h2>
         <ul className="book-details__tags" aria-label="Book topics">{book.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>
         <p className="book-details__description">{book.bookDescription}</p>

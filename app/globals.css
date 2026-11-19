@@ -545,3 +545,19 @@ button.shell-nav-item:hover:not(:disabled), a.shell-nav-item:hover { background:
 .settings-skeleton span:nth-child(2) { width: 65%; }
 .settings-skeleton span:last-child { height: 44px; width: 180px; }
 @media (max-width: 600px) { .settings-signed-out { margin-block: 32px; } .settings-details { gap: 24px 40px; } .settings-section { padding-block: 24px; } }
+
+.library-save { margin: 0 0 28px; }
+.library-section { margin: 32px 0; }
+.library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 28px; padding: 0; list-style: none; }
+.library-grid li { min-width: 0; }
+.library-grid h3, .library-grid p { overflow-wrap: anywhere; }
+.library-grid .recommendation__cover { max-width: 100%; }
+.statistics-benefits li { animation: active-benefit 18s infinite; }
+.statistics-benefits li:nth-child(2) { animation-delay: 3s; }
+.statistics-benefits li:nth-child(3) { animation-delay: 6s; }
+.statistics-benefits li:nth-child(4) { animation-delay: 9s; }
+.statistics-benefits li:nth-child(5) { animation-delay: 12s; }
+.statistics-benefits li:nth-child(6) { animation-delay: 15s; }
+@keyframes active-benefit { 0%, 16% { color: #036b40; } 17%, 100% { color: inherit; } }
+@media (prefers-reduced-motion: reduce) { .statistics-benefits li { animation: none; } }
+.audio-player__completion { flex-basis: 100%; margin: 0; }

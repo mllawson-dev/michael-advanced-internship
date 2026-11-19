@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, createUserWithEmailAndPassword, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
 import { authReturnPath } from "../lib/book-access";
 import { getConfiguredAuth } from "../lib/firebase-auth";
 
@@ -20,6 +20,9 @@ const AuthContext = createContext<AuthState | null>(null);
 function errorMessage(error: unknown): string {
   const code = error && typeof error === "object" && "code" in error ? error.code : "";
   switch (code) {
+    case "auth/popup-closed-by-user": return "Google sign-in was cancelled. Try again when you’re ready.";
+    case "auth/popup-blocked": return "Allow popups for this site to sign in with Google.";
+    case "auth/account-exists-with-different-credential": return "Use your existing sign-in method for this email.";
     case "auth/email-already-in-use": return "An account already exists for this email. Try logging in.";
     case "auth/invalid-email": return "Enter a valid email address.";
     case "auth/weak-password": return "Use a password with at least 6 characters.";
@@ -27,7 +30,7 @@ function errorMessage(error: unknown): string {
     case "auth/wrong-password":
     case "auth/user-not-found": return "Email or password is incorrect.";
     case "auth/too-many-requests": return "Too many attempts. Please try again later.";
-    case "auth/operation-not-allowed": return "This sign-in method is not enabled in Firebase. Enable Email/Password and Anonymous in Authentication settings.";
+    case "auth/operation-not-allowed": return "This sign-in method is not enabled in Firebase. Enable the requested provider (Email/Password, Anonymous, or Google) in Authentication settings.";
     case "auth/configuration-not-found": return "Firebase Authentication is not set up yet. Open Authentication in the Firebase console and enable the sign-in methods.";
     case "auth/unauthorized-domain": return "This website domain is not authorized in Firebase Authentication settings.";
     case "auth/invalid-api-key": return "Firebase configuration could not be verified. Check the web app settings.";
@@ -44,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const returnPath = useRef("/for-you");
   const previousOverflow = useRef("");
   const busy = useRef(false);
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "reset">("login");
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,17 +109,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMessage("");
     try {
       const auth = getConfiguredAuth();
+      if (mode === "reset" && event) {
+        // Firebase owns recovery delivery and abuse throttling; do not reveal account existence.
+        await sendPasswordResetEmail(auth, email);
+        setMessage("If an account uses this email, a password reset link has been sent. Check your inbox and spam folder.");
+        return;
+      }
       if (!event) await signInAnonymously(auth);
       else if (mode === "register") await createUserWithEmailAndPassword(auth, email, password);
       else await signInWithEmailAndPassword(auth, email, password);
       dialog.current?.close();
       router.push(returnPath.current);
     } catch (failure) {
-      setMessage(errorMessage(failure));
+      setMessage(mode === "reset" && failure && typeof failure === "object" && "code" in failure && failure.code === "auth/user-not-found" ? "If an account uses this email, a password reset link has been sent. Check your inbox and spam folder." : errorMessage(failure));
     } finally {
       busy.current = false;
       setPending(false);
     }
+  }
+
+  async function googleLogin() {
+    if (busy.current || loading || !enabled) return;
+    busy.current = true; setPending(true); setMessage("");
+    try {
+      await signInWithPopup(getConfiguredAuth(), new GoogleAuthProvider());
+      dialog.current?.close();
+      router.push(returnPath.current);
+    } catch (failure) { setMessage(errorMessage(failure)); }
+    finally { busy.current = false; setPending(false); }
   }
 
   async function logout() {
@@ -141,18 +161,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {error && <p className="auth-global-error" role="alert">{error}</p>}
       <dialog ref={dialog} className="auth-modal" aria-labelledby="auth-title" aria-describedby="auth-description" onClose={finishClose} onCancel={(event) => { if (busy.current) event.preventDefault(); }}>
         <button className="auth-close" type="button" aria-label="Close authentication" disabled={pending} onClick={() => dialog.current?.close()}>×</button>
-        <h2 id="auth-title">{mode === "login" ? "Log in to Summarist" : "Create your account"}</h2>
+        <h2 id="auth-title">{mode === "login" ? "Log in to Summarist" : mode === "reset" ? "Reset your password" : "Create your account"}</h2>
         <p id="auth-description">{process.env.NEXT_PUBLIC_AUTH_MODE === "emulator" ? "Local test accounts only. Use a test email and password; these accounts do not connect to live Firebase." : enabled ? "Sign in to your Summarist account, create an account, or continue as a guest." : "Authentication is not configured yet."}</p>
         <form key={mode} onSubmit={authenticate} aria-busy={pending}>
           <fieldset className="auth-fields" disabled={pending || loading || !enabled}>
             <label htmlFor="auth-email">Email</label>
             <input id="auth-email" name="email" type="email" autoComplete="email" required autoFocus />
-            <label htmlFor="auth-password">Password</label>
-            <input id="auth-password" name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 6 : undefined} required />
+            {mode !== "reset" && <><label htmlFor="auth-password">Password</label>
+            <input id="auth-password" name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 6 : undefined} required /></>}
             {mode === "register" && <p className="auth-hint">Use at least 6 characters.</p>}
-            <button className="button" type="submit">{pending ? "Please wait…" : mode === "login" ? "Login" : "Register"}</button>
+            <button className="button" type="submit">{pending ? "Please wait…" : mode === "login" ? "Login" : mode === "reset" ? "Send reset email" : "Register"}</button>
           </fieldset>
         </form>
+        {mode === "login" && <button className="auth-switch" type="button" disabled={pending} onClick={() => { setMode("reset"); setMessage(""); }}>Forgot password?</button>}
+        <button className="auth-guest" type="button" disabled={pending || loading || !enabled} onClick={() => void googleLogin()}>Continue with Google</button>
         <button className="auth-guest" type="button" disabled={pending || loading || !enabled} onClick={() => void authenticate()}>Login as a guest</button>
         <p className="auth-status" role="status">{loading ? "Checking session…" : message}</p>
         <button className="auth-switch" type="button" disabled={pending} onClick={() => { setMode(mode === "login" ? "register" : "login"); setMessage(""); }}>{mode === "login" ? "Don’t have an account? Register" : "Already have an account? Login"}</button>
