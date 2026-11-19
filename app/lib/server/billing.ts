@@ -14,13 +14,13 @@ export function database() {
   const app = getApps().find((app) => app.name === "billing") ?? initializeApp({ credential: applicationDefault(), projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID }, "billing");
   return getFirestore(app);
 }
-export async function identity(request: Request) {
+export async function identity(request: Request, allowAnonymous = false) {
   if (process.env.NEXT_PUBLIC_AUTH_MODE !== "firebase" || process.env.FIREBASE_AUTH_EMULATOR_HOST) throw new Error("Live identity required");
   const token = request.headers.get("authorization")?.match(/^Bearer (.+)$/)?.[1];
   if (!token) throw new Error("Authentication required");
   database();
   const user = await getAuth(getApps().find((app) => app.name === "billing")).verifyIdToken(token, true);
-  if (user.firebase.sign_in_provider === "anonymous") throw new Error("Registered account required");
+  if (!allowAnonymous && user.firebase.sign_in_provider === "anonymous") throw new Error("Registered account required");
   return user;
 }
 export function origin(request?: Request) {

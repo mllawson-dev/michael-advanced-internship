@@ -6,5 +6,5 @@ export function bookDestination(id: string, premium: boolean, entitled = false, 
 }
 
 export function authReturnPath(value?: string): string {
-  return value && /^(?:\/book\/[a-zA-Z0-9_-]{1,128}|\/settings|\/choose-plan(?:\?plan=(?:monthly|annual))?)$/.test(value) ? value : '/for-you';
+  return value && /^(?:\/book\/[a-zA-Z0-9_-]{1,128}|\/settings|\/library|\/choose-plan(?:\?plan=(?:monthly|annual))?)$/.test(value) ? value : '/for-you';
 }

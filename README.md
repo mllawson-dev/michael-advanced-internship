@@ -291,3 +291,43 @@ than presenting an unverified Basic plan as current. Portal creation requires an
 available registered session, uses a bounded request and exact Stripe portal
 origin, and prevents duplicate clicks. No billing APIs or entitlement policies
 were changed in this stage.
+
+## Stage 11: Optional features
+
+Authentication includes Firebase Google popup sign-in and a Forgot password mode
+using Firebase's hosted reset-email flow. Both preserve the existing modal and
+allowlisted return paths. Reset confirmation does not disclose whether an account
+exists. Firebase owns provider abuse throttling and recovery email delivery;
+configuration and SDK failures block the operation rather than bypassing it.
+Enable **Google** in Firebase Authentication → Sign-in method, select a support
+email, and ensure the website hostname is an authorized domain. Popup cancellation
+and blocked popups have explicit messages. Existing email/password users should
+use their original sign-in method if Firebase reports a provider conflict. No
+custom OAuth callback, email service, or new dependency was added.
+
+Book details supports adding/removing a title in My Library. `/library` lists
+saved and finished books separately. A summary becomes finished on the native
+audio element's `ended` event; finishing does not automatically save it. Failed
+completion writes offer retry. Saved and finished flags are independent and writes
+are idempotent merges, so finishing preserves a concurrently changed saved flag.
+Saved/finished tracking begins in this stage; there is no historical data to
+backfill. Text reading alone does not mark a book finished, matching the brief.
+
+`/api/library` verifies a live Firebase ID token (including live anonymous guests)
+and reads/writes only `libraries/{verified uid}/books/{validated book id}`.
+Metadata comes from the validated book loader, never client-submitted fields.
+Mutations check the configured APP_URL origin first. All guards and storage
+failures fail closed; direct browser Firestore access remains denied. The existing
+Admin credentials and Firestore setup used by billing are required; this does not
+change billing eligibility for guests. Guest libraries belong to their anonymous
+identity and do not transfer automatically to a registered account. Emulator-only
+auth mode does not connect to live library storage. Library reads use bounded 100-record cursor pages, consumed by the client
+under one cancellable request deadline. Removing an unfinished title deletes its
+record; finished records retain their completion flag.
+
+The homepage benefit headings cycle their active colour using CSS, with motion
+disabled for `prefers-reduced-motion`. No timer, animation dependency or layout
+shift is introduced.
+
+Focused optional-feature checks: `npm run test:library`, `npm run typecheck`,
+and `npm run lint`. Project-wide final verification follows this implementation.
