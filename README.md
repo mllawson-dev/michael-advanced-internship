@@ -1,5 +1,13 @@
 # Summarist virtual internship
 
+A full-stack book-summary and audiobook app built with Next.js (App Router),
+React, TypeScript, Firebase Authentication, Firestore, and Stripe (test mode).
+
+Features: a responsive marketing homepage; email/password, Google, and guest
+login with password reset; a For You feed; book details; a reader and audio
+player; search by title or author; a saved and finished-book library; monthly
+and annual subscription checkout with a seven-day trial; and account settings.
+
 ## Run locally
 
 Use Node.js 24 LTS (the project pin is in `.nvmrc`) and npm:
@@ -11,9 +19,9 @@ npm run dev
 ```
 
 If you do not use nvm, select Node.js 24 with your installed version manager.
-Open http://localhost:3000. The root route displays the responsive static homepage: navigation, hero,
-features, benefits and statistics, testimonials, growth metrics, and footer.
-No environment configuration is required to run this stage.
+Open http://localhost:3000. The homepage runs without configuration; sign-in,
+library, and billing need the Firebase and Stripe settings in `.env.example`
+(copy it to `.env.local`) or the local emulator setup described below.
 
 ## Checks
 
@@ -30,30 +38,25 @@ Type checking generates Next.js route types before running TypeScript.
 
 ## Structure
 
-- `app/`: Next.js App Router layout, homepage, and plain CSS.
+- `app/`: Next.js App Router pages, components, API routes, and plain CSS.
+  - `app/(app)/`: signed-in pages (For You, book, player, library, plans, settings).
+  - `app/api/`: server routes for book content, the library, and Stripe billing.
+  - `app/lib/`: shared book, search, access, library, and billing logic.
+- `tests/`: Node test runner suites for auth, books, billing, and the library.
+- `firestore.rules`: denies all direct client access; data goes through server routes.
 - `public/assets/`: byte-for-byte copies of the supplied image assets.
 - `index.html`, `style.css`, and `assets/`: unchanged starter references.
-- `.env.example`: future Firebase browser configuration and Stripe server-only
-  test-mode variables; copy to `.env.local` when those integrations are built.
+- `.env.example`: Firebase browser configuration and Stripe server-only
+  test-mode variables; copy to `.env.local`.
 
-Next.js, React, and the Firebase client SDK are runtime dependencies. TypeScript, ESLint, and
-Next.js lint rules provide development checks. Versions are pinned in
-`package.json` and resolved in `package-lock.json`.
+Next.js, React, Firebase, Firebase Admin, and Stripe are runtime dependencies.
+TypeScript, ESLint, and Next.js lint rules provide development checks. Versions
+are pinned in `package.json` and resolved in `package-lock.json`. Roboto is
+self-hosted by `next/font/google`; builds need network access to download it.
+Testimonials and numerical claims on the homepage are supplied internship
+reference content, not live analytics.
 
-## Next stages
-
-The static homepage is implemented from the supplied starter references. Roboto
-is self-hosted by `next/font/google`; builds require network access to download
-the font from Google. Homepage Login buttons open a shared Login/Register/Guest modal. Local emulator
-authentication supports email/password registration, login, anonymous guest login,
-session restoration, logout, and a redirect to `/for-you`. Navigation/footer items
-without implemented destinations are non-interactive. Testimonials and numerical
-claims are supplied internship reference content, not live analytics.
-
-Book APIs, the app sidebar, reader,
-audio player, search, test checkout, and settings follow in the agreed plan.
-Optional features come after required features. Subscription tier naming is
-pending confirmation. Firebase Authentication supports explicit live or emulator mode. Stripe is not connected.
+The sections below document each build stage in order.
 
 ## Local authentication without a Firebase account
 
