@@ -1,7 +1,7 @@
 import "server-only";
 import Stripe from "stripe";
 import { accessForSubscription, canStartCheckout } from "../billing-policy";
-import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
+import { applicationDefault, cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
@@ -10,8 +10,21 @@ export function stripe() {
   if (!key?.startsWith("sk_test_")) throw new Error("Test billing is not configured");
   return new Stripe(key, { maxNetworkRetries: 2, timeout: 10000 });
 }
+// Hosted deployments (e.g. Vercel) have no key file, so they pass the service-account JSON
+// in FIREBASE_SERVICE_ACCOUNT_KEY. Local development keeps GOOGLE_APPLICATION_CREDENTIALS.
+export function adminCredential() {
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  if (!raw) return applicationDefault();
+  let key: { project_id?: unknown; client_email?: unknown; private_key?: unknown };
+  try { key = JSON.parse(raw); } catch { throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY is not valid JSON"); }
+  const { project_id: projectId, client_email: clientEmail, private_key: privateKey } = key;
+  if (typeof projectId !== "string" || typeof clientEmail !== "string" || typeof privateKey !== "string") throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY is incomplete");
+  // Fail closed: admin access must target the same project the browser authenticates against.
+  if (projectId !== process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) throw new Error("Service account project mismatch");
+  return cert({ projectId, clientEmail, privateKey: privateKey.replace(/\\n/g, "\n") });
+}
 export function database() {
-  const app = getApps().find((app) => app.name === "billing") ?? initializeApp({ credential: applicationDefault(), projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID }, "billing");
+  const app = getApps().find((app) => app.name === "billing") ?? initializeApp({ credential: adminCredential(), projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID }, "billing");
   return getFirestore(app);
 }
 export async function identity(request: Request, allowAnonymous = false) {

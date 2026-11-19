@@ -36,6 +36,28 @@ npm start
 `npm run build`. Development uses http://localhost:3000.
 Type checking generates Next.js route types before running TypeScript.
 
+## Deploy to Vercel
+
+1. Import the repository in Vercel; it detects Next.js. Use Node.js 24.
+2. Add these environment variables (Production):
+   - `NEXT_PUBLIC_AUTH_MODE=firebase` and the six `NEXT_PUBLIC_FIREBASE_*` values.
+   - `FIREBASE_SERVICE_ACCOUNT_KEY`: the full contents of the Firebase
+     service-account JSON file (Project settings → Service accounts →
+     Generate new private key). Its `project_id` must match
+     `NEXT_PUBLIC_FIREBASE_PROJECT_ID`. Do not set `GOOGLE_APPLICATION_CREDENTIALS`.
+   - `STRIPE_SECRET_KEY` (test mode, `sk_test_…`), `STRIPE_MONTHLY_PRICE_ID`,
+     and `STRIPE_ANNUAL_PRICE_ID`.
+   - `APP_URL`: the deployment's exact `https://` origin, with no trailing path.
+3. In Firebase Authentication → Settings → Authorized domains, add the Vercel domain.
+4. In the Stripe test-mode dashboard, add a webhook endpoint at
+   `https://<domain>/api/billing/webhook` for `checkout.session.completed`,
+   `customer.subscription.created`, `customer.subscription.updated`,
+   `customer.subscription.deleted`, `charge.refunded`, and
+   `charge.dispute.created`. Put its signing secret in `STRIPE_WEBHOOK_SECRET`.
+5. Redeploy so the new variables take effect.
+
+Live Stripe keys and live webhook events are rejected by design.
+
 ## Structure
 
 - `app/`: Next.js App Router pages, components, API routes, and plain CSS.
